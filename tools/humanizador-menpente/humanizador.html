@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Humanizador de Texto IA - 100% Offline</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .highlight-add { 
+      background-color: #d4edda; 
+      border-bottom: 2px solid #28a745;
+    }
+    .highlight-remove { 
+      background-color: #f8d7da; 
+      text-decoration: line-through; 
+    }
+    .loading { 
+      animation: pulse 1.5s ease-in-out infinite; 
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .comparison-mode {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .diff-original { background-color: #fff3cd; }
+    .diff-changed { background-color: #d1ecf1; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4 md:p-6">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- Header -->
+    <header class="mb-8 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-3">
+        🤖→👤 Humanizador de Texto IA
+      </h1>
+      <p class="text-gray-600 text-lg">
+        Transforma texto generado por IA en escritura natural y humana.
+      </p>
+      <p class="text-sm text-gray-500 mt-2">
+        ✨ 100% Offline • 🔒 Sin APIs • 🚀 Sin límites • 🇪🇸 Optimizado para Español
+      </p>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      
+      <!-- Input Panel -->
+      <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            📝 Texto Original
+          </h2>
+          <button 
+            id="btnLimpiar" 
+            class="text-sm text-gray-500 hover:text-red-600 transition-colors"
+            title="Limpiar texto">
+            🗑️ Limpiar
+          </button>
+        </div>
+        
+        <textarea 
+          id="inputText" 
+          class="w-full h-80 p-4 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+          placeholder="Pega aquí tu texto generado por IA...
+
+Ejemplo:
+Asimismo, es importante mencionar que la inteligencia artificial es una tecnología emergente. Por consiguiente, debemos considerar sus implicaciones. Adicionalmente, es necesario que se lleven a cabo investigaciones exhaustivas..."></textarea>
+        
+        <!-- Métricas Input -->
+        <div class="mt-4 flex flex-wrap gap-4 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">Palabras:</span>
+            <span class="font-bold text-blue-600" id="inputWords">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">Oraciones:</span>
+            <span class="font-bold text-green-600" id="inputSentences">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">Caracteres:</span>
+            <span class="font-bold text-purple-600" id="inputChars">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">IA Score:</span>
+            <span class="font-bold text-orange-600" id="aiScore">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            ✨ Texto Humanizado
+          </h2>
+          <div class="flex gap-2">
+            <button 
+              id="btnCopiar"
+              class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg transition-colors"
+              title="Copiar al portapapeles">
+              📋 Copiar
+            </button>
+            <button 
+              id="btnDescargar"
+              class="text-sm bg-green-100 hover:bg-green-200 px-3 py-1 rounded-lg transition-colors"
+              title="Descargar como .txt">
+              💾 Descargar
+            </button>
+          </div>
+        </div>
+        
+        <div 
+          id="outputText" 
+          class="w-full h-80 p-4 border-2 border-gray-200 rounded-lg bg-gray-50 overflow-y-auto"
+          style="white-space: pre-wrap; line-height: 1.6;">
+          <span class="text-gray-400 italic">El texto humanizado aparecerá aquí después de procesar...</span>
+        </div>
+        
+        <!-- Métricas Output -->
+        <div class="mt-4 flex flex-wrap gap-4 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">Palabras:</span>
+            <span class="font-bold text-blue-600" id="outputWords">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">Oraciones:</span>
+            <span class="font-bold text-green-600" id="outputSentences">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">Cambios:</span>
+            <span class="font-bold text-orange-600" id="changes">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">Mejora:</span>
+            <span class="font-bold text-green-600" id="improvement">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">⚙️ Configuración</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        
+        <!-- Nivel de Humanización -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            🎚️ Nivel de Humanización
+          </label>
+          <select id="nivel" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="ligero">Ligero (muy rápido)</option>
+            <option value="medio" selected>Medio (recomendado)</option>
+            <option value="agresivo">Agresivo (máxima transformación)</option>
+          </select>
+          <p class="text-xs text-gray-500 mt-1" id="nivelDesc">Balance perfecto entre velocidad y calidad</p>
+        </div>
+
+        <!-- Estilo -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            🎨 Estilo de Escritura
+          </label>
+          <select id="estilo" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="casual">Casual (conversacional)</option>
+            <option value="profesional" selected>Profesional Cercano</option>
+            <option value="creativo">Creativo (expresivo)</option>
+          </select>
+          <p class="text-xs text-gray-500 mt-1" id="estiloDesc">Formal pero amigable y natural</p>
+        </div>
+
+        <!-- Intensidad de Cambios -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            💪 Intensidad (<span id="intensidadValue">50</span>%)
+          </label>
+          <input 
+            type="range" 
+            id="intensidad" 
+            min="0" 
+            max="100" 
+            value="50" 
+            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+          <p class="text-xs text-gray-500 mt-1">Controla cuántos cambios aplicar</p>
+        </div>
+
+        <!-- Opciones Adicionales -->
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <input type="checkbox" id="preservarCitas" checked class="w-4 h-4 text-blue-600">
+            <span>🔒 Preservar Citas</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <input type="checkbox" id="preservarAcronimos" checked class="w-4 h-4 text-blue-600">
+            <span>🏷️ Preservar Acrónimos</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <input type="checkbox" id="mostrarCambios" class="w-4 h-4 text-blue-600">
+            <span>🔍 Resaltar Cambios</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Main Action Button -->
+      <button 
+        id="btnHumanizar"
+        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+        ✨ Humanizar Texto Ahora
+      </button>
+
+      <!-- Progress Bar -->
+      <div id="progressBar" class="mt-4 hidden">
+        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+          <div id="progress" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <p id="progressText" class="text-sm text-gray-600 mt-2 text-center">Procesando...</p>
+      </div>
+    </div>
+
+    <!-- Analytics Panel -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">📊 Análisis de Transformación</h3>
+      
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div class="text-center p-4 bg-blue-50 rounded-lg">
+          <p class="text-3xl font-bold text-blue-600" id="statContracciones">0</p>
+          <p class="text-xs text-gray-600 mt-1">Contracciones</p>
+        </div>
+        <div class="text-center p-4 bg-green-50 rounded-lg">
+          <p class="text-3xl font-bold text-green-600" id="statTransiciones">0</p>
+          <p class="text-xs text-gray-600 mt-1">Transiciones</p>
+        </div>
+        <div class="text-center p-4 bg-purple-50 rounded-lg">
+          <p class="text-3xl font-bold text-purple-600" id="statSinonimos">0</p>
+          <p class="text-xs text-gray-600 mt-1">Sinónimos</p>
+        </div>
+        <div class="text-center p-4 bg-orange-50 rounded-lg">
+          <p class="text-3xl font-bold text-orange-600" id="statEstructura">0</p>
+          <p class="text-xs text-gray-600 mt-1">Estructura</p>
+        </div>
+        <div class="text-center p-4 bg-pink-50 rounded-lg">
+          <p class="text-3xl font-bold text-pink-600" id="statMuletillas">0</p>
+          <p class="text-xs text-gray-600 mt-1">Muletillas</p>
+        </div>
+        <div class="text-center p-4 bg-indigo-50 rounded-lg">
+          <p class="text-3xl font-bold text-indigo-600" id="statProtegidos">0</p>
+          <p class="text-xs text-gray-600 mt-1">Protegidos</p>
+        </div>
+        <div class="text-center p-4 bg-cyan-50 rounded-lg">
+          <p class="text-3xl font-bold text-cyan-600" id="statParafraseos">0</p>
+          <p class="text-xs text-gray-600 mt-1">Paráfrasis IA</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-3">💡 Consejos para Mejores Resultados</h3>
+      <ul class="space-y-2 text-sm text-gray-700">
+        <li>✅ Usa el nivel <strong>"Medio"</strong> para la mayoría de textos</li>
+        <li>✅ Activa <strong>"Preservar Citas"</strong> si el texto tiene referencias académicas</li>
+        <li>✅ El estilo <strong>"Profesional Cercano"</strong> funciona bien para emails y blogs</li>
+        <li>✅ Ajusta la <strong>intensidad</strong> si sientes que hay demasiados o pocos cambios</li>
+        <li>✅ Revisa siempre el resultado para asegurar que mantiene el sentido original</li>
+        <li>🤖 El nivel <strong>"Agresivo"</strong> usa IA para parafrasear (requiere descargar modelo ~80MB la primera vez)</li>
+      </ul>
+    </div>
+
+    <!-- Model Status Panel -->
+    <div id="modelStatus" class="bg-yellow-50 border-l-4 border-yellow-400 rounded-xl p-6 mb-6 hidden">
+      <div class="flex items-start gap-3">
+        <div class="text-2xl">⚠️</div>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-yellow-800 mb-2">Nivel Agresivo Requiere Modelo IA</h3>
+          <p class="text-sm text-yellow-700 mb-3">
+            Has seleccionado el nivel "Agresivo" que utiliza un modelo de IA (mT5) para parafrasear el texto.
+            El modelo se descargará la primera vez (~80MB) y se almacenará en caché para futuros usos.
+          </p>
+          <div class="flex gap-3">
+            <button id="btnPrecargarModelo" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+              📥 Descargar Modelo Ahora
+            </button>
+            <button id="btnCerrarAviso" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+              Cerrar
+            </button>
+          </div>
+          <div id="modelDownloadProgress" class="mt-3 hidden">
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div id="modelProgress" class="bg-yellow-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p class="text-xs text-yellow-700 mt-1" id="modelProgressText">Descargando modelo...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-500 text-sm pb-4">
+      <p class="mb-2">Desarrollado con ❤️ para la comunidad hispanohablante</p>
+      <p class="text-xs">100% Open Source • No recopila datos • Funciona completamente offline</p>
+      <p class="text-xs mt-2 text-gray-400">v1.0 - MVP | Febrero 2026</p>
+    </footer>
+  </div>
+
+  <!-- JavaScript -->
+  <script type="module">
+    // ============================================
+    // CONFIGURACIÓN GLOBAL
+    // ============================================
+
+    const CONFIG = {
+      patronesIA: {
+        transiciones: [
+          { texto: 'Asimismo', regex: /\bAsimismo\b/g, peso: 0.9 },
+          { texto: 'Por consiguiente', regex: /\bPor consiguiente\b/g, peso: 0.9 },
+          { texto: 'En consecuencia', regex: /\bEn consecuencia\b/g, peso: 0.8 },
+          { texto: 'Adicionalmente', regex: /\bAdicionalmente\b/g, peso: 0.7 },
+          { texto: 'No obstante', regex: /\bNo obstante\b/g, peso: 0.6 },
+          { texto: 'En virtud de', regex: /\bEn virtud de\b/g, peso: 0.8 },
+          { texto: 'Cabe señalar', regex: /\bCabe señalar\b/g, peso: 0.7 },
+          { texto: 'Es menester', regex: /\bEs menester\b/g, peso: 0.9 }
+        ],
+        formalidadExcesiva: [
+          { texto: 'utilizar', regex: /\butilizar\b/gi, peso: 0.6 },
+          { texto: 'efectuar', regex: /\befectuar\b/gi, peso: 0.7 },
+          { texto: 'realizar', regex: /\brealizar\b/gi, peso: 0.5 },
+          { texto: 'emplear', regex: /\bemplear\b/gi, peso: 0.6 },
+          { texto: 'llevar a cabo', regex: /\bllevar a cabo\b/gi, peso: 0.8 }
+        ]
+      },
+
+      diccionarios: {
+        formalidad: {
+          'utilizar': 'usar',
+          'efectuar': 'hacer',
+          'realizar': 'hacer',
+          'emplear': 'usar',
+          'llevar a cabo': 'hacer',
+          'posteriormente': 'después',
+          'previamente': 'antes',
+          'adicionalmente': 'además',
+          'asimismo': 'también',
+          'no obstante': 'pero',
+          'en consecuencia': 'por eso',
+          'por consiguiente': 'entonces',
+          'cabe mencionar': 'vale mencionar',
+          'es menester': 'es necesario',
+          'en virtud de': 'debido a'
+        },
+
+        transiciones: {
+          'Asimismo': ['También', 'Y además', 'Encima', 'Además'],
+          'Por consiguiente': ['Entonces', 'Así que', 'Por eso', 'De ahí que'],
+          'En consecuencia': ['Por eso', 'Entonces', 'Así que'],
+          'No obstante': ['Pero', 'Sin embargo', 'Aunque', 'Eso sí'],
+          'Adicionalmente': ['Además', 'También', 'Y encima', 'Por otro lado'],
+          'En virtud de': ['Debido a', 'Por', 'Gracias a'],
+          'Cabe señalar': ['Vale mencionar', 'Es importante notar', 'Hay que decir'],
+          'Es menester': ['Es necesario', 'Hay que', 'Se debe']
+        },
+
+        muletillas: {
+          casual: {
+            inicio: ['Bueno', 'Pues', 'Mira', 'Oye'],
+            medio: ['osea', 'tipo', 'como que', 'digamos', 'más o menos'],
+            conexion: ['y bueno', 'entonces', 'encima']
+          },
+          profesional: {
+            inicio: ['Por cierto', 'Cabe mencionar', 'Es importante notar'],
+            medio: ['en este sentido', 'en efecto', 'ciertamente'],
+            conexion: ['de igual modo', 'en este contexto', 'en esta línea']
+          },
+          creativo: {
+            inicio: ['Imagina', 'Piensa en', 'Visualiza', 'Considera esto'],
+            medio: ['como si', 'de alguna manera', 'en cierto modo'],
+            conexion: ['y he aquí que', 'de pronto', 'curiosamente']
+          }
+        }
+      }
+    };
+
+    // ============================================
+    // CLASE PRINCIPAL: HUMANIZADOR
+    // ============================================
+
+    class HumanizadorTexto {
+      constructor(config) {
+        this.config = config;
+        this.stats = this.resetStats();
+        this.modeloCargado = null;
+        this.pipeline = null;
+        this.cacheParafraseo = new Map(); // Cache para evitar re-procesar
+      }
+
+      resetStats() {
+        return {
+          contracciones: 0,
+          transiciones: 0,
+          sinonimos: 0,
+          estructura: 0,
+          muletillas: 0,
+          protegidos: 0,
+          parafraseos: 0,
+          palabrasOriginales: 0,
+          palabrasFinales: 0,
+          aiScore: 0
+        };
+      }
+
+      // ========================================
+      // PARÁFRASIS CON TRANSFORMERS.JS
+      // ========================================
+
+      async cargarModelo(onProgress = null) {
+        if (this.modeloCargado) {
+          return this.pipeline;
+        }
+
+        try {
+          console.log('🤖 Cargando Transformers.js...');
+          
+          // Importar Transformers.js dinámicamente
+          const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+          
+          // Configurar para usar cache del navegador
+          env.allowLocalModels = false;
+          env.allowRemoteModels = true;
+          
+          console.log('📦 Descargando modelo mT5-small...');
+          
+          // Cargar modelo con callback de progreso
+          this.pipeline = await pipeline(
+            'text2text-generation',
+            'Xenova/mt5-small',
+            {
+              quantized: true, // Usar versión cuantizada (más pequeña)
+              progress_callback: onProgress
+            }
+          );
+          
+          this.modeloCargado = true;
+          console.log('✅ Modelo cargado exitosamente');
+          
+          return this.pipeline;
+          
+        } catch (error) {
+          console.error('❌ Error al cargar modelo:', error);
+          throw new Error(`No se pudo cargar el modelo: ${error.message}`);
+        }
+      }
+
+      async parafrasearConModelo(texto, onProgress = null) {
+        // Intentar cargar el modelo
+        try {
+          await this.cargarModelo(onProgress);
+        } catch (error) {
+          console.warn('Modelo no disponible, usando solo reglas');
+          return texto;
+        }
+
+        // Dividir en oraciones
+        const oraciones = texto.split(/(?<=[.!?])\s+/);
+        const resultados = [];
+
+        for (let i = 0; i < oraciones.length; i++) {
+          let oracion = oraciones[i].trim();
+          
+          if (!oracion) {
+            resultados.push('');
+            continue;
+          }
+
+          const palabras = oracion.split(/\s+/).length;
+
+          // Solo parafrasear oraciones de longitud media (8-30 palabras)
+          // Oraciones muy cortas o muy largas no se benefician del modelo
+          if (palabras >= 8 && palabras <= 30) {
+            
+            // Verificar cache
+            const cacheKey = oracion.toLowerCase();
+            if (this.cacheParafraseo.has(cacheKey)) {
+              resultados.push(this.cacheParafraseo.get(cacheKey));
+              continue;
+            }
+
+            try {
+              // Llamar al modelo
+              const resultado = await this.pipeline(
+                `paraphrase: ${oracion}`,
+                {
+                  max_length: Math.min(palabras * 2, 100),
+                  num_beams: 2,
+                  temperature: 0.8,
+                  do_sample: false
+                }
+              );
+
+              const parafraseado = resultado[0].generated_text;
+              
+              // Validar que el parafraseo sea diferente y tenga sentido
+              if (parafraseado && 
+                  parafraseado.length > 5 && 
+                  parafraseado.toLowerCase() !== oracion.toLowerCase()) {
+                
+                // Guardar en cache
+                this.cacheParafraseo.set(cacheKey, parafraseado);
+                resultados.push(parafraseado);
+                this.stats.parafraseos++;
+                
+              } else {
+                resultados.push(oracion);
+              }
+
+            } catch (error) {
+              console.warn(`Error parafraseando oración: ${error.message}`);
+              resultados.push(oracion); // Usar original si falla
+            }
+
+          } else {
+            // Oraciones muy cortas o largas se mantienen
+            resultados.push(oracion);
+          }
+
+          // Actualizar progreso si hay callback
+          if (onProgress) {
+            const progreso = ((i + 1) / oraciones.length) * 100;
+            onProgress({ progress: progreso });
+          }
+        }
+
+        return resultados.join(' ');
+      }
+
+      // ========================================
+      // MÉTODO PRINCIPAL (MODIFICADO)
+      // ========================================
+
+      async humanizar(texto, opciones = {}) {
+        const {
+          nivel = 'medio',
+          estilo = 'profesional',
+          intensidad = 50,
+          preservarCitas = true,
+          preservarAcronimos = true,
+          onProgress = null
+        } = opciones;
+
+        this.stats = this.resetStats();
+        this.stats.palabrasOriginales = this.contarPalabras(texto);
+        this.stats.aiScore = this.calcularScoreIA(texto);
+
+        // Factor de intensidad (0-100 -> 0-1)
+        const factor = intensidad / 100;
+
+        // FASE 1: Proteger contenido
+        let resultado = texto;
+        let protegidos = [];
+
+        if (onProgress) onProgress({ stage: 'protect', progress: 10 });
+
+        if (preservarCitas || preservarAcronimos) {
+          const proteccion = this.protegerContenido(texto, { preservarCitas, preservarAcronimos });
+          resultado = proteccion.textoLimpio;
+          protegidos = proteccion.protegidos;
+          this.stats.protegidos = protegidos.length;
+        }
+
+        // FASE 2: Transformaciones básicas (siempre)
+        if (onProgress) onProgress({ stage: 'transform', progress: 30 });
+        
+        resultado = this.reducirFormalidad(resultado, factor);
+        resultado = this.reemplazarTransiciones(resultado, factor);
+
+        // FASE 3: Transformaciones según nivel
+        if (nivel === 'medio' || nivel === 'agresivo') {
+          if (onProgress) onProgress({ stage: 'structure', progress: 50 });
+          
+          resultado = this.variarEstructura(resultado, factor);
+          resultado = this.insertarMuletillas(resultado, estilo, factor);
+        }
+
+        if (nivel === 'agresivo') {
+          if (onProgress) onProgress({ stage: 'restructure', progress: 60 });
+          
+          resultado = this.reestructurarOracionesLargas(resultado);
+          resultado = this.agregarVariacionLexica(resultado, factor);
+
+          // FASE 4: Parafraseo con modelo (NUEVO)
+          if (onProgress) onProgress({ stage: 'paraphrase', progress: 70 });
+          
+          try {
+            resultado = await this.parafrasearConModelo(resultado, (prog) => {
+              if (onProgress) {
+                onProgress({ 
+                  stage: 'paraphrase', 
+                  progress: 70 + (prog.progress * 0.2) // 70-90%
+                });
+              }
+            });
+          } catch (error) {
+            console.warn('Parafraseo con modelo falló, continuando con reglas:', error);
+          }
+        }
+
+        // FASE 5: Restaurar contenido protegido
+        if (onProgress) onProgress({ stage: 'restore', progress: 95 });
+        
+        resultado = this.restaurarContenido(resultado, protegidos);
+
+        // FASE 6: Limpiar espacios
+        resultado = this.limpiarEspacios(resultado);
+
+        this.stats.palabrasFinales = this.contarPalabras(resultado);
+
+        if (onProgress) onProgress({ stage: 'complete', progress: 100 });
+
+        return {
+          texto: resultado,
+          stats: this.stats,
+          mejora: this.calcularMejora(texto, resultado)
+        };
+      }
+
+      // ========================================
+      // DETECCIÓN Y ANÁLISIS
+      // ========================================
+
+      calcularScoreIA(texto) {
+        let score = 0;
+        let totalChecks = 0;
+
+        // Verificar transiciones formales
+        this.config.patronesIA.transiciones.forEach(patron => {
+          const matches = (texto.match(patron.regex) || []).length;
+          if (matches > 0) {
+            score += matches * patron.peso;
+            totalChecks += matches;
+          }
+        });
+
+        // Verificar formalidad excesiva
+        this.config.patronesIA.formalidadExcesiva.forEach(patron => {
+          const matches = (texto.match(patron.regex) || []).length;
+          if (matches > 0) {
+            score += matches * patron.peso;
+            totalChecks += matches;
+          }
+        });
+
+        // Normalizar score (0-100)
+        const normalizado = totalChecks > 0 ? Math.min((score / totalChecks) * 100, 100) : 0;
+        return Math.round(normalizado);
+      }
+
+      // ========================================
+      // PROTECCIÓN DE CONTENIDO
+      // ========================================
+
+      protegerContenido(texto, opciones) {
+        const protegidos = [];
+        let textoLimpio = texto;
+
+        if (opciones.preservarCitas) {
+          // Proteger citas APA
+          const citasAPA = texto.match(/\([A-ZÁÉÍÓÚÑa-záéíóúñ]+(?:\s+(?:et\s+al\.|y\s+[A-ZÁÉÍÓÚÑa-záéíóúñ]+))?,\s+\d{4}\)/g) || [];
+          citasAPA.forEach((cita, i) => {
+            const placeholder = `__CITA_${i}__`;
+            protegidos.push({ placeholder, original: cita, tipo: 'cita' });
+            textoLimpio = textoLimpio.replace(cita, placeholder);
+          });
+
+          // Proteger referencias numéricas
+          const referencias = texto.match(/\[\d+\]/g) || [];
+          referencias.forEach((ref, i) => {
+            const placeholder = `__REF_${i}__`;
+            protegidos.push({ placeholder, original: ref, tipo: 'referencia' });
+            textoLimpio = textoLimpio.replace(ref, placeholder);
+          });
+        }
+
+        if (opciones.preservarAcronimos) {
+          // Proteger acrónimos (2+ mayúsculas consecutivas)
+          const acronimos = texto.match(/\b[A-ZÁÉÍÓÚÑ]{2,}\b/g) || [];
+          const unicos = [...new Set(acronimos)];
+          unicos.forEach((acr, i) => {
+            const placeholder = `__ACR_${i}__`;
+            protegidos.push({ placeholder, original: acr, tipo: 'acronimo' });
+            textoLimpio = textoLimpio.replace(new RegExp(`\\b${acr}\\b`, 'g'), placeholder);
+          });
+        }
+
+        // Proteger URLs
+        const urls = texto.match(/https?:\/\/[^\s]+/g) || [];
+        urls.forEach((url, i) => {
+          const placeholder = `__URL_${i}__`;
+          protegidos.push({ placeholder, original: url, tipo: 'url' });
+          textoLimpio = textoLimpio.replace(url, placeholder);
+        });
+
+        return { textoLimpio, protegidos };
+      }
+
+      restaurarContenido(texto, protegidos) {
+        let resultado = texto;
+        protegidos.forEach(({ placeholder, original }) => {
+          resultado = resultado.replace(new RegExp(placeholder, 'g'), original);
+        });
+        return resultado;
+      }
+
+      // ========================================
+      // TRANSFORMACIONES
+      // ========================================
+
+      reducirFormalidad(texto, factor) {
+        let resultado = texto;
+        const diccionario = this.config.diccionarios.formalidad;
+
+        Object.entries(diccionario).forEach(([formal, informal]) => {
+          const regex = new RegExp(`\\b${formal}\\b`, 'gi');
+          const matches = resultado.match(regex);
+          
+          if (matches) {
+            matches.forEach(() => {
+              if (Math.random() < factor) {
+                resultado = resultado.replace(regex, informal);
+                this.stats.sinonimos++;
+              }
+            });
+          }
+        });
+
+        return resultado;
+      }
+
+      reemplazarTransiciones(texto, factor) {
+        let resultado = texto;
+        const transiciones = this.config.diccionarios.transiciones;
+
+        Object.entries(transiciones).forEach(([formal, alternativas]) => {
+          const regex = new RegExp(`\\b${formal}\\b`, 'g');
+          const matches = texto.match(regex);
+
+          if (matches) {
+            matches.forEach(() => {
+              if (Math.random() < factor) {
+                const alternativa = alternativas[Math.floor(Math.random() * alternativas.length)];
+                resultado = resultado.replace(regex, alternativa);
+                this.stats.transiciones++;
+              }
+            });
+          }
+        });
+
+        return resultado;
+      }
+
+      variarEstructura(texto, factor) {
+        const oraciones = texto.split(/(?<=[.!?])\s+/);
+        const resultado = [];
+
+        for (let i = 0; i < oraciones.length; i++) {
+          let oracion = oraciones[i].trim();
+          if (!oracion) continue;
+
+          const palabras = oracion.split(/\s+/);
+
+          // Dividir oraciones muy largas (>25 palabras)
+          if (palabras.length > 25 && Math.random() < factor * 0.8) {
+            const mitad = Math.floor(palabras.length / 2);
+            
+            // Buscar punto de corte natural (después de comas)
+            let puntoCorte = mitad;
+            for (let j = mitad - 3; j < mitad + 3; j++) {
+              if (palabras[j] && palabras[j].includes(',')) {
+                puntoCorte = j + 1;
+                break;
+              }
+            }
+
+            const parte1 = palabras.slice(0, puntoCorte).join(' ').replace(/,$/, '');
+            const parte2 = palabras.slice(puntoCorte).join(' ');
+            const parte2Cap = parte2.charAt(0).toUpperCase() + parte2.slice(1);
+            
+            resultado.push(parte1 + '.');
+            resultado.push(parte2Cap);
+            this.stats.estructura++;
+          } else {
+            resultado.push(oracion);
+          }
+        }
+
+        return resultado.join(' ');
+      }
+
+      insertarMuletillas(texto, estilo, factor) {
+        const muletillas = this.config.diccionarios.muletillas[estilo];
+        if (!muletillas) return texto;
+
+        const oraciones = texto.split(/(?<=[.!?])\s+/);
+        const resultado = oraciones.map((oracion, i) => {
+          // Solo añadir muletillas con probabilidad proporcional al factor
+          const prob = factor * 0.4; // Máximo 40% de probabilidad
+          
+          if (Math.random() < prob && i > 0) {
+            const tipo = Math.random();
+            let muletilla;
+
+            if (tipo < 0.6) {
+              muletilla = muletillas.inicio[Math.floor(Math.random() * muletillas.inicio.length)];
+              this.stats.muletillas++;
+              return `${muletilla}, ${oracion.charAt(0).toLowerCase()}${oracion.slice(1)}`;
+            } else if (tipo < 0.9 && i < oraciones.length - 1) {
+              muletilla = muletillas.conexion[Math.floor(Math.random() * muletillas.conexion.length)];
+              this.stats.muletillas++;
+              return oracion.replace(/\.$/, `, ${muletilla}.`);
+            }
+          }
+          
+          return oracion;
+        });
+
+        return resultado.join(' ');
+      }
+
+      reestructurarOracionesLargas(texto) {
+        const oraciones = texto.split(/(?<=[.!?])\s+/);
+        
+        return oraciones.map(oracion => {
+          const palabras = oracion.split(/\s+/);
+          
+          // Si la oración es muy larga y tiene muchas comas, considerar reestructurar
+          if (palabras.length > 30) {
+            const comas = (oracion.match(/,/g) || []).length;
+            if (comas >= 2) {
+              // Simplemente remover una coma y convertirla en punto
+              const partes = oracion.split(',');
+              if (partes.length > 2) {
+                const medio = Math.floor(partes.length / 2);
+                const parte1 = partes.slice(0, medio).join(',');
+                const parte2 = partes.slice(medio).join(',');
+                const parte2Cap = parte2.trim().charAt(0).toUpperCase() + parte2.trim().slice(1);
+                this.stats.estructura++;
+                return `${parte1}. ${parte2Cap}`;
+              }
+            }
+          }
+          
+          return oracion;
+        }).join(' ');
+      }
+
+      agregarVariacionLexica(texto, factor) {
+        // Variaciones adicionales para nivel agresivo
+        const variaciones = {
+          'muy': ['bastante', 'realmente', 'sumamente', 'extremadamente'],
+          'importante': ['clave', 'crucial', 'fundamental', 'esencial'],
+          'bueno': ['excelente', 'positivo', 'favorable', 'beneficioso'],
+          'malo': ['negativo', 'desfavorable', 'perjudicial', 'adverso'],
+          'grande': ['enorme', 'considerable', 'significativo', 'sustancial']
+        };
+
+        let resultado = texto;
+
+        Object.entries(variaciones).forEach(([palabra, alternativas]) => {
+          const regex = new RegExp(`\\b${palabra}\\b`, 'gi');
+          const matches = resultado.match(regex);
+          
+          if (matches && Math.random() < factor * 0.5) {
+            const alternativa = alternativas[Math.floor(Math.random() * alternativas.length)];
+            resultado = resultado.replace(regex, alternativa);
+            this.stats.sinonimos++;
+          }
+        });
+
+        return resultado;
+      }
+
+      limpiarEspacios(texto) {
+        return texto
+          .replace(/\s+/g, ' ')           // Múltiples espacios -> uno
+          .replace(/\s+([.,;:!?])/g, '$1') // Espacio antes de puntuación
+          .replace(/([.,;:!?])([^\s])/g, '$1 $2') // Espacio después de puntuación
+          .replace(/\.\s+\./g, '.')       // Puntos duplicados
+          .trim();
+      }
+
+      // ========================================
+      // MÉTRICAS Y UTILIDADES
+      // ========================================
+
+      contarPalabras(texto) {
+        return texto.trim().split(/\s+/).filter(w => w.length > 0).length;
+      }
+
+      contarOraciones(texto) {
+        return texto.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+      }
+
+      calcularMejora(original, humanizado) {
+        const scoreOriginal = this.calcularScoreIA(original);
+        const scoreHumanizado = this.calcularScoreIA(humanizado);
+        const mejora = scoreOriginal - scoreHumanizado;
+        return Math.max(0, mejora);
+      }
+    }
+
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+
+    let humanizador = new HumanizadorTexto(CONFIG);
+    let textoOriginalGuardado = '';
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnHumanizar = document.getElementById('btnHumanizar');
+      const btnCopiar = document.getElementById('btnCopiar');
+      const btnDescargar = document.getElementById('btnDescargar');
+      const btnLimpiar = document.getElementById('btnLimpiar');
+      const btnPrecargarModelo = document.getElementById('btnPrecargarModelo');
+      const btnCerrarAviso = document.getElementById('btnCerrarAviso');
+      const inputText = document.getElementById('inputText');
+      const outputText = document.getElementById('outputText');
+      const nivelSelect = document.getElementById('nivel');
+      const estiloSelect = document.getElementById('estilo');
+      const intensidadSlider = document.getElementById('intensidad');
+      const modelStatus = document.getElementById('modelStatus');
+
+      // Descripciones dinámicas
+      const descripciones = {
+        nivel: {
+          ligero: 'Cambios mínimos, muy rápido',
+          medio: 'Balance perfecto entre velocidad y calidad',
+          agresivo: 'Transformación máxima con IA, tarda más'
+        },
+        estilo: {
+          casual: 'Conversacional, con muletillas naturales',
+          profesional: 'Formal pero amigable y natural',
+          creativo: 'Expresivo, con lenguaje rico y variado'
+        }
+      };
+
+      // Mostrar aviso cuando se selecciona nivel agresivo
+      nivelSelect.addEventListener('change', (e) => {
+        document.getElementById('nivelDesc').textContent = descripciones.nivel[e.target.value];
+        
+        if (e.target.value === 'agresivo' && !humanizador.modeloCargado) {
+          modelStatus.classList.remove('hidden');
+        } else {
+          modelStatus.classList.add('hidden');
+        }
+      });
+
+      estiloSelect.addEventListener('change', (e) => {
+        document.getElementById('estiloDesc').textContent = descripciones.estilo[e.target.value];
+      });
+
+      intensidadSlider.addEventListener('input', (e) => {
+        document.getElementById('intensidadValue').textContent = e.target.value;
+      });
+
+      // Cerrar aviso del modelo
+      btnCerrarAviso.addEventListener('click', () => {
+        modelStatus.classList.add('hidden');
+      });
+
+      // Precargar modelo
+      btnPrecargarModelo.addEventListener('click', async () => {
+        btnPrecargarModelo.disabled = true;
+        btnPrecargarModelo.innerHTML = '⏳ Descargando...';
+        document.getElementById('modelDownloadProgress').classList.remove('hidden');
+
+        try {
+          await humanizador.cargarModelo((progress) => {
+            const percent = Math.round(progress.progress || 0);
+            document.getElementById('modelProgress').style.width = percent + '%';
+            document.getElementById('modelProgressText').textContent = 
+              `Descargando modelo... ${percent}%`;
+          });
+
+          btnPrecargarModelo.innerHTML = '✅ Modelo Cargado';
+          btnPrecargarModelo.classList.add('bg-green-600', 'hover:bg-green-700');
+          
+          setTimeout(() => {
+            modelStatus.classList.add('hidden');
+          }, 2000);
+
+        } catch (error) {
+          console.error('Error precargando modelo:', error);
+          btnPrecargarModelo.innerHTML = '❌ Error al Descargar';
+          btnPrecargarModelo.classList.add('bg-red-600');
+          alert('No se pudo descargar el modelo. Verifica tu conexión a internet.');
+        }
+      });
+
+      // Humanizar
+      btnHumanizar.addEventListener('click', async () => {
+        const texto = inputText.value.trim();
+        
+        if (!texto) {
+          alert('⚠️ Por favor, ingresa un texto para humanizar.');
+          return;
+        }
+
+        if (texto.split(/\s+/).length < 10) {
+          alert('⚠️ El texto es muy corto. Necesita al menos 10 palabras para procesarlo correctamente.');
+          return;
+        }
+
+        textoOriginalGuardado = texto;
+
+        // UI: Modo loading
+        btnHumanizar.disabled = true;
+        btnHumanizar.innerHTML = '⏳ Procesando...';
+        document.getElementById('progressBar').classList.remove('hidden');
+        
+        const opciones = {
+          nivel: nivelSelect.value,
+          estilo: estiloSelect.value,
+          intensidad: parseInt(intensidadSlider.value),
+          preservarCitas: document.getElementById('preservarCitas').checked,
+          preservarAcronimos: document.getElementById('preservarAcronimos').checked,
+          onProgress: (info) => {
+            const messages = {
+              'protect': 'Protegiendo contenido...',
+              'transform': 'Aplicando transformaciones...',
+              'structure': 'Variando estructura...',
+              'restructure': 'Reestructurando oraciones...',
+              'paraphrase': 'Parafraseando con IA...',
+              'restore': 'Restaurando contenido protegido...',
+              'complete': '¡Completado!'
+            };
+            
+            document.getElementById('progress').style.width = info.progress + '%';
+            document.getElementById('progressText').textContent = 
+              messages[info.stage] || 'Procesando...';
+          }
+        };
+
+        try {
+          const resultado = await humanizador.humanizar(texto, opciones);
+          
+          outputText.innerHTML = resultado.texto;
+          
+          // Actualizar estadísticas
+          document.getElementById('statContracciones').textContent = resultado.stats.contracciones;
+          document.getElementById('statTransiciones').textContent = resultado.stats.transiciones;
+          document.getElementById('statSinonimos').textContent = resultado.stats.sinonimos;
+          document.getElementById('statEstructura').textContent = resultado.stats.estructura;
+          document.getElementById('statMuletillas').textContent = resultado.stats.muletillas;
+          document.getElementById('statProtegidos').textContent = resultado.stats.protegidos;
+          document.getElementById('statParafraseos').textContent = resultado.stats.parafraseos || 0;
+
+          // Actualizar métricas
+          actualizarMetricas(resultado);
+
+          // Scroll a resultados
+          outputText.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        } catch (error) {
+          console.error('Error:', error);
+          alert('❌ Ocurrió un error al procesar el texto: ' + error.message);
+          outputText.innerHTML = `<span class="text-red-500">Error: ${error.message}</span>`;
+        } finally {
+          btnHumanizar.disabled = false;
+          btnHumanizar.innerHTML = '✨ Humanizar Texto Ahora';
+          document.getElementById('progressBar').classList.add('hidden');
+          document.getElementById('progress').style.width = '0%';
+        }
+      });
+
+      // Copiar
+      btnCopiar.addEventListener('click', () => {
+        const texto = outputText.textContent;
+        
+        if (!texto || texto.includes('aparecerá aquí')) {
+          alert('⚠️ No hay texto humanizado para copiar.');
+          return;
+        }
+
+        navigator.clipboard.writeText(texto).then(() => {
+          const original = btnCopiar.innerHTML;
+          btnCopiar.innerHTML = '✅ ¡Copiado!';
+          btnCopiar.classList.add('bg-green-200');
+          
+          setTimeout(() => {
+            btnCopiar.innerHTML = original;
+            btnCopiar.classList.remove('bg-green-200');
+          }, 2000);
+        }).catch(() => {
+          alert('❌ No se pudo copiar. Intenta seleccionar y copiar manualmente.');
+        });
+      });
+
+      // Descargar
+      btnDescargar.addEventListener('click', () => {
+        const texto = outputText.textContent;
+        
+        if (!texto || texto.includes('aparecerá aquí')) {
+          alert('⚠️ No hay texto humanizado para descargar.');
+          return;
+        }
+
+        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `texto-humanizado-${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Feedback visual
+        const original = btnDescargar.innerHTML;
+        btnDescargar.innerHTML = '✅ Descargado!';
+        setTimeout(() => {
+          btnDescargar.innerHTML = original;
+        }, 2000);
+      });
+
+      // Limpiar
+      btnLimpiar.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que quieres limpiar el texto?')) {
+          inputText.value = '';
+          outputText.innerHTML = '<span class="text-gray-400 italic">El texto humanizado aparecerá aquí después de procesar...</span>';
+          resetearEstadisticas();
+          actualizarMetricas();
+        }
+      });
+
+      // Actualizar métricas en tiempo real
+      inputText.addEventListener('input', actualizarMetricas);
+
+      // Función: Actualizar métricas
+      function actualizarMetricas(resultado = null) {
+        const input = inputText.value;
+        const output = outputText.textContent;
+
+        const inputWords = humanizador.contarPalabras(input);
+        const inputSentences = humanizador.contarOraciones(input);
+
+        document.getElementById('inputWords').textContent = inputWords;
+        document.getElementById('inputSentences').textContent = inputSentences;
+        document.getElementById('inputChars').textContent = input.length;
+
+        if (resultado) {
+          document.getElementById('outputWords').textContent = resultado.stats.palabrasFinales;
+          document.getElementById('outputSentences').textContent = humanizador.contarOraciones(output);
+          document.getElementById('changes').textContent = Math.abs(inputWords - resultado.stats.palabrasFinales);
+          document.getElementById('aiScore').textContent = resultado.stats.aiScore + '%';
+          document.getElementById('improvement').textContent = '+' + resultado.mejora + '%';
+        } else if (output && !output.includes('aparecerá aquí')) {
+          const outputWords = humanizador.contarPalabras(output);
+          document.getElementById('outputWords').textContent = outputWords;
+          document.getElementById('outputSentences').textContent = humanizador.contarOraciones(output);
+          document.getElementById('changes').textContent = Math.abs(inputWords - outputWords);
+        } else {
+          document.getElementById('outputWords').textContent = '0';
+          document.getElementById('outputSentences').textContent = '0';
+          document.getElementById('changes').textContent = '0';
+          document.getElementById('aiScore').textContent = '--';
+          document.getElementById('improvement').textContent = '--';
+        }
+      }
+
+      // Función: Resetear estadísticas
+      function resetearEstadisticas() {
+        document.getElementById('statContracciones').textContent = '0';
+        document.getElementById('statTransiciones').textContent = '0';
+        document.getElementById('statSinonimos').textContent = '0';
+        document.getElementById('statEstructura').textContent = '0';
+        document.getElementById('statMuletillas').textContent = '0';
+        document.getElementById('statProtegidos').textContent = '0';
+        document.getElementById('statParafraseos').textContent = '0';
+      }
+
+      // Atajo de teclado: Ctrl+Enter para humanizar
+      inputText.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          btnHumanizar.click();
+        }
+      });
+
+      console.log('✅ Humanizador cargado correctamente');
+    });
+  </script>
+</body>
+</html>
