@@ -26,5 +26,5 @@ Consulte los manuales técnicos y resúmenes de despliegue en las subcarpetas de
 
 ---
 
-**Autor:** Security Analyst  
-**Licencia:** Uso Privado / Propietario
+**Autor:** Juan Carlos Araneda M.  
+**Licencia:** MIT License (consulte [LICENSE](LICENSE))
